@@ -5,7 +5,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "pnpm --parallel --filter './apps*' dev", 
+    "dev": "pnpm --parallel --filter './apps/api*' --filter @env-training/web dev",               
     "test": "pnpm --recursive test"
   },
   "keywords": [],
