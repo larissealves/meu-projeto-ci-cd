@@ -1,0 +1,22 @@
+{
+  "name": "env-training",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "pnpm --parallel --filter './apps*' dev", 
+    "test": "pnpm --recursive test"
+  },
+  "keywords": [],
+  "author": "Larisse Alves",
+  "license": "ISC",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.22.0",
+      "onFail": "download"
+    }
+  },
+  "type": "module"
+}
