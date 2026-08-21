@@ -2,7 +2,7 @@
   "name": "env-training",
   "private": true,
   "version": "1.0.0",
-  "description": "",
+  "description": "A small full-stack project for practicing Development, Test, and Production environments, environment variables, Neon PostgreSQL branches, and deployment workflows.",
   "main": "index.js",
   "scripts": {
     "dev": "pnpm --parallel --filter './apps/api*' --filter @env-training/web dev",               

@@ -19,3 +19,57 @@ permite executar TypeScript
 --watch
         ↓
 reinicia quando houver alteração
+
+=======================================
+
+-> pnpm lê o package.json do root e o script direciona
+para os packages necessários e em paralelo executa o scrip de cada um.
+
+root: 
+ "scripts": {
+    "dev": "pnpm --parallel --filter './apps/api*' --filter @env-training/web dev",               
+},
+
+apps/api:  "dev": "node --env-file=../../.env.development --import=tsx/esm --watch src/server.ts",
+apps/web:  "dev": "vite"
+
+
+O pnpm identifica quais "pastas" são package a serem executados conforme
+for definido no file `pnpm-workspace.yaml` localizado no root.
+
+packages:
+  - "apps/*"
+  - "packages/*"
+
+passam a ser conhecidos pelo pnpm como workspace packages.
+====================
+
+`env` é uma variável disponível no processo do Node.json
+process é um objeto global fornecido pelo Node.
+
+Então:
+
+`process`: representa informações/configurações do processo atual.
+
+Dentro dele existe: `process.env`que representa as environment variables daquele processo.
+
+Neste caso, o Node lê o arquivo o arquivo definido no script dev, start e/ou test.
+
+ "scripts": {
+    "dev": "node --env-file=../../.env.development --import=tsx/esm --watch src/server.ts",
+    "build": "tsc",
+    "start": "node --env-file=/../../.env.production dist/server.js",
+    "test": "node --env-file=../../.env.test --import=tsx/esm src/server.ts"
+  },
+
+apps/api/package.js
+
+Então quando o código faz:
+
+process.env.NODE_ENV
+
+O Node encontra o arquivo, abre e disponibiliza a variável para o process
+
+o Node consegue encontrar o valor definido. Neste caso: development
+======================
+
