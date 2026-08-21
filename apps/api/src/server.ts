@@ -13,7 +13,7 @@ app.get("/health", async () => {
 
 console.log({
   nodeENV: process.env.NODE_ENV,
-  appName: process.env.APP_name,
+  appName: process.env.APP_NAME,
 });
 
 const port = 3000;
