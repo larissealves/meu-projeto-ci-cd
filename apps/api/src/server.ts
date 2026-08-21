@@ -11,6 +11,11 @@ app.get("/health", async () => {
   };
 });
 
+console.log({
+  nodeENV: process.env.NODE_ENV,
+  appName: process.env.APP_name,
+});
+
 const port = 3000;
 
 app.listen({ port }).then(() => {

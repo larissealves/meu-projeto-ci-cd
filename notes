@@ -2,3 +2,20 @@
 
  VITE v8.2.2  ready in 390 ms
 │   ➜  Local:   http://localhost:5174/
+
+
+======================================
+
+apps/api/package.json
+
+--env-file=../../.env.development
+        ↓
+carrega as variáveis desse arquivo
+
+--import=tsx/esm
+        ↓
+permite executar TypeScript
+
+--watch
+        ↓
+reinicia quando houver alteração
