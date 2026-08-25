@@ -1,75 +1,200 @@
- API running on http://localhost:3000
-
- VITE v8.2.2  ready in 390 ms
-│   ➜  Local:   http://localhost:5174/
-
+https://about.gitlab.com/topics/ci-cd/ 
 
 ======================================
 
-apps/api/package.json
+1. "GitHub, execute esse workflow quando houver push para main ou quando existir um Pull Request destinado à main."
 
---env-file=../../.env.development
+.github/workflow/ci.yml
+
+
+Onde executa: runs-on: ubuntu-latest
+o seu computador não está executando o teste.
+O GitHub cria uma máquina virtual temporária com Ubuntu, executa o workflow e depois descarta essa máquina.
+
+Quando o GitHub Actions roda, ele cria uma máquina temporária.
+
+o .yml é basicamente uma receita para o GitHub executar.
+
+Para não usar credenciais escritas diretamente no YAML
+usar/configurar GitHub`` Secrets/Variables.``
+
+o pipeline pode falhar por código, configuração ou pelo próprio workflow
+
+========
+Lint: analisa o código e procura por problemas de qualidade/estilo
+> O ESLint vai olhar seu código e procurar coisas como:
+const user = "Larisse"
+console.log(user)
+
+dependências incorretas de hooks, variáveis não usadas, problemas de sintaxe/padrões etc., dependendo das regras configuradas.
+
+Ele responde:
+
+"O código está seguindo as regras que definimos?"
+
+Build: compila o projeto e/ou gera a aplicação para produção
+Ele responde:
+
+"Consigo transformar esse código em uma aplicação pronta para ser executada/publicada?"
+
+E normalmente cria:
+
+apps/web/dist/
+
+com os arquivos finais da aplicação.
+---------------------------------
+Por exemplo, você pode ter uma regra de ESLint quebrada, mas o código ainda conseguir ser compilado.
+
+Ou pode ter um erro de TypeScript que impede o build.
+
+Então nosso CI vai ficar:
+
+                           CI
+                  │
+          ┌───────┴───────┐
+          ↓               ↓
+       Backend          Frontend
+          │               │
+        test        ┌─────┴─────┐
+                    ↓           ↓
+                  lint        build
+                    │           │
+                    └─────┬─────┘
+                          ↓
+                     tudo passou
+
+pnpm --filter @env-training/web build: Queremos descobrir se o frontend consegue ser transformado em uma versão de produção.
+==============================
+
+Localmente você executou:
+
+pnpm test
+pnpm --filter @env-training/web lint
+pnpm --filter @env-training/web build
+
+O GitHub está executando os mesmos comandos em uma máquina limpa.
+
+Essa é uma das grandes ideias de CI:
+
+> Não basta funcionar na minha máquina; o projeto precisa conseguir ser validado em um ambiente reproduzível.
+
+-------------------------------
+> como o CI cria o ambiente de teste?
+Settings → Secrets and variables → Actions
+Variables → Actions → New repository variable
+
+APP_NAME=env-training-test
+APP_NAME=${{ vars.APP_NAME_TEST }} #usando variavel criada no git
+---------------------------------
+
+> Melhorar o CI
+
+Job = uma unidade de trabalho executada em um runner.
+
+Step = uma ação/comando dentro daquele job.
+
+
+1. Jobs podem ser independentes
+Não faz sentido o frontend esperar o backend terminar se eles são independentes.
+
+O GitHub pode executar jobs em paralelo.
+
+Isso pode deixar pipelines maiores mais rápidos.
+============================
+
+> colocar uma regra na main
+
+impede merge quando o CI não passar com status de sucesso
+
+1. Settings → Rules → Rulesets
+2. nama: Protect main | 
+Enforcement status : active
+3. target: defina a branch principal
+4. selecione: Require status checks to pass before merging
+
+============================
+
+STEP 2  - CD 
+"Beleza, o código passou em todos os checks. E agora? Como ele chega até uma aplicação publicada?"
+
+
+> Continuous Delivery: O pipeline deixa a aplicação pronta para ser publicada. Mas pode existir uma aprovação manual antes da publicação.
+it
+ ↓
+CI
+ ↓
+build
+ ↓
+artefato pronto
+ ↓
+🚚 pronto para deploy
+
+Continuous Deployment
+
+O pipeline vai além:
+
+Git
+ ↓
+CI
+ ↓
+build
+ ↓
+deploy automático
+ ↓
+🌎 aplicação publicada
+
+Sem alguém precisar clicar em "deploy".
+observação: o dist/ não deve ir para o Git. Ele é resultado do build e deve ser gerado pelo pipeline.
+
+====================================
+
+CI
+
+Já fazemos:
+
+pnpm --filter @env-training/web build
+
+Isso cria:
+
+apps/web/dist
+CD
+
+Precisamos pegar esse resultado e dizer:
+
+"GitHub, publique esse conteúdo."
+
+É essa segunda parte que vamos adicionar.
+
+Antes disso, vamos verificar uma coisa
+
+
+FLOW:
+
+Create test environment
         ↓
-carrega as variáveis desse arquivo
-
---import=tsx/esm
+Check test environment
         ↓
-permite executar TypeScript
-
---watch
+Install dependencies
         ↓
-reinicia quando houver alteração
+Run tests
+        ↓
+Run web lint
+        ↓
+Build web
 
-=======================================
+=========================================
+FLOW ACTIONS:
 
--> pnpm lê o package.json do root e o script direciona
-para os packages necessários e em paralelo executa o scrip de cada um.
-
-root: 
- "scripts": {
-    "dev": "pnpm --parallel --filter './apps/api*' --filter @env-training/web dev",               
-},
-
-apps/api:  "dev": "node --env-file=../../.env.development --import=tsx/esm --watch src/server.ts",
-apps/web:  "dev": "vite"
-
-
-O pnpm identifica quais "pastas" são package a serem executados conforme
-for definido no file `pnpm-workspace.yaml` localizado no root.
-
-packages:
-  - "apps/*"
-  - "packages/*"
-
-passam a ser conhecidos pelo pnpm como workspace packages.
-====================
-
-`env` é uma variável disponível no processo do Node.json
-process é um objeto global fornecido pelo Node.
-
-Então:
-
-`process`: representa informações/configurações do processo atual.
-
-Dentro dele existe: `process.env`que representa as environment variables daquele processo.
-
-Neste caso, o Node lê o arquivo o arquivo definido no script dev, start e/ou test.
-
- "scripts": {
-    "dev": "node --env-file=../../.env.development --import=tsx/esm --watch src/server.ts",
-    "build": "tsc",
-    "start": "node --env-file=/../../.env.production dist/server.js",
-    "test": "node --env-file=../../.env.test --import=tsx/esm src/server.ts"
-  },
-
-apps/api/package.js
-
-Então quando o código faz:
-
-process.env.NODE_ENV
-
-O Node encontra o arquivo, abre e disponibiliza a variável para o process
-
-o Node consegue encontrar o valor definido. Neste caso: development
-======================
-
+GitHub Secret
+      ↓
+workflow
+      ↓
+.env.test
+      ↓
+source
+      ↓
+TEST_SECRET disponível
+      ↓
+test -n
+      ↓
+✅
