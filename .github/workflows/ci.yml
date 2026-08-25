@@ -30,7 +30,7 @@ jobs:
       - name: Create test environment
         run: |
           echo "NODE_ENV=test" > .env.test
-          echo "APP_NAME=env-training-test" >> .env.test
+          echo "APP_NAME=${{ vars.APP_NAME_TEST }} " >> .env.test
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
