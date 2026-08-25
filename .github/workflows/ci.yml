@@ -37,3 +37,9 @@ jobs:
 
       - name: Run tests
         run: pnpm test
+
+      - name: Run web lint
+        run: pnpm --filter @env-training/web lint
+
+      - name: Build web
+        run: pnpm --filter @env-training/web build
