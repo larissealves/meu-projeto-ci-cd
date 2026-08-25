@@ -6,7 +6,6 @@ import './App.css'
 
 function App() {
   const [count, setCount] = useState(0)
-  const ciTest: string = 123;
   return (
     <>
       <section id="center">
