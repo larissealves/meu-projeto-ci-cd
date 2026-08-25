@@ -31,6 +31,12 @@ jobs:
         run: |
           echo "NODE_ENV=test" > .env.test
           echo "APP_NAME=${{ vars.APP_NAME_TEST }} " >> .env.test
+          echo "TEST_SECRET=${{ secrets.TEST_SECRET }}" >> .env.test
+
+      - name: Check test environment
+        run: |
+          source .env.test
+          test -n "$TEST_SECRET"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
